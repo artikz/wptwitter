@@ -22,6 +22,7 @@ $wpTwitter_options = array(
 		'number' => array('label' => 'Number:', 'type' => 'text', 'default' => '5'),
 		'format' => array('label' => 'Format:', 'type' => 'text', 'default' => '"%text%" <a href="http://twitter.com/%user-name%/statuses/%id%" style="font-size:70%">%created_at%</a>'),
 		'followme' => array('label' => 'Follow me text:', 'type' => 'text', 'default' => 'follow me on twitter'),
+		'showreplies' =>  array('label' => 'Show replies:', 'type' => 'checkbox', 'default' => ''),
 	),
 	'cache' => '',
 );
@@ -56,7 +57,7 @@ function widget_wpTwitter($args) {
 	if ($options['cache']) {
 		$data = json_decode($options['cache']);
 		$c = $options['number'];
-		foreach ($data as $v) {
+		foreach ($data as $v) if ($options['showreplies'] || ($v->text[0] != '@')) {
 			$v->created_at = relative_time(strtotime($v->created_at));
 			$a = array();
 			$b = array();
@@ -84,7 +85,11 @@ function widget_wpTwitter_control() {
 	if (isset($_POST['wpTwitter_submit'])) {
 		foreach ($wpTwitter_options['fields'] as $k => $v) {
 			$id = 'wpTwitter_'.$k;
-			$options[$k] = stripslashes($_POST[$id]);
+			if ($v['type'] == 'checkbox') {
+				$options[$k] = (isset($_POST[$id]) ? 'checked' : '');
+			} else {
+				$options[$k] = stripslashes($_POST[$id]);
+			}
 		}
 		update_option('widget_wpTwitter', $options);
 	}
@@ -95,7 +100,7 @@ function widget_wpTwitter_control() {
 		}
 		$options[$k] = htmlspecialchars($options[$k], ENT_QUOTES);
 		$id = 'wpTwitter_'.$k;
-		echo '<p style="text-align:right"><label for="'.$k.'">'.__($v['label']).'</label><input type="'.$v['type'].'" name="'.$id.'" id="'.$id.'" value="'.$options[$k].'" /></p>';
+		echo '<p style="text-align:right"><label for="'.$k.'">'.__($v['label']).'</label><input type="'.$v['type'].'" name="'.$id.'" id="'.$id.'" value="'.$options[$k].'" '.($v['type'] == 'checkbox' ? $options[$k] : '').'/></p>';
 	}
 	echo '<input type="hidden" name="wpTwitter_submit" id="wpTwitter_submit" value="1" />';
 }
