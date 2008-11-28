@@ -11,7 +11,6 @@ Author URI: http://arti.kz/
 if ($_GET['updateWPTwitter']) {
 	$options = get_option('widget_wpTwitter');
 	$options['cache'] = file_get_contents('http://twitter.com/statuses/user_timeline/'.$options['username'].'.json');
-	print_r($options);
 	update_option('widget_wpTwitter', $options);
 	die();
 }
